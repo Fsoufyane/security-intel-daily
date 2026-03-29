@@ -1,5 +1,58 @@
 import { useState } from "react";
 
+const T = {
+  fr: {
+    fetch: "Récupérer les news du jour",
+    fetching: "Chargement...",
+    tabs: ["News","Tendances","Hashtags","Calendrier","Projets"],
+    recap: "Récap quotidien BustedData (FR + EN)",
+    generating: "Génération...",
+    analyse: "Analyser les tendances",
+    hashtags: "Générer la stratégie hashtags",
+    calendar: "Générer le calendrier",
+    export: "Export Pack",
+    copy: "Copier",
+    addProject: "Nouveau projet",
+    projectName: "Nom du projet",
+    projectTopic: "Sujet / thématique",
+    projectDesc: "Description & type de contenu recherché",
+    projectPlaceholder: "Ex: Actualités IA pour startup tech, ton vulgarisation, posts LinkedIn + TikTok...",
+    projectSave: "Créer le projet",
+    projectSearch: "Rechercher du contenu",
+    searching: "Recherche en cours...",
+    noProjects: "Aucun projet. Créez-en un pour commencer.",
+    lastFetch: "Dernière mise à jour",
+    viral: ["Faible","Moyen","Viral"],
+    cached: "News en cache — connexion limitée.",
+    btns: ["🎙️ Script ElevenLabs","🖼️ Image Prompt","📱 Post Copy","✍️ Blog","🧵 Thread X","🔁 Variations"],
+  },
+  en: {
+    fetch: "Fetch today's news",
+    fetching: "Loading...",
+    tabs: ["News","Trends","Hashtags","Calendar","Projects"],
+    recap: "Daily Recap BustedData (FR + EN)",
+    generating: "Generating...",
+    analyse: "Analyse trends",
+    hashtags: "Generate hashtag strategy",
+    calendar: "Generate calendar",
+    export: "Export Pack",
+    copy: "Copy",
+    addProject: "New project",
+    projectName: "Project name",
+    projectTopic: "Topic / theme",
+    projectDesc: "Description & content type",
+    projectPlaceholder: "E.g. AI news for tech startup, casual tone, LinkedIn + TikTok posts...",
+    projectSave: "Create project",
+    projectSearch: "Search content",
+    searching: "Searching...",
+    noProjects: "No projects yet. Create one to get started.",
+    lastFetch: "Last fetch",
+    viral: ["Low","Medium","Viral"],
+    cached: "Using cached news.",
+    btns: ["🎙️ ElevenLabs Script","🖼️ Image Prompt","📱 Post Copy","✍️ Blog","🧵 X Thread","🔁 Variations"],
+  }
+};
+
 async function askClaude(prompt) {
   const r = await fetch("/api/claude", {
     method: "POST",
@@ -12,258 +65,368 @@ async function askClaude(prompt) {
   return d.text;
 }
 
-function ProgressBar({ label, pct }) {
-  return (
-    <div style={{ margin: "12px 0" }}>
-      <div style={{ fontSize: 12, color: "#a78bfa", marginBottom: 5 }}>{label}</div>
-      <div style={{ background: "#1e1e3a", borderRadius: 99, height: 6, overflow: "hidden" }}>
-        <div style={{ height: "100%", borderRadius: 99, background: "linear-gradient(90deg,#7c3aed,#4f46e5)", width: pct + "%", transition: "width 0.35s ease" }} />
-      </div>
-      <div style={{ fontSize: 11, color: "#475569", marginTop: 3, textAlign: "right" }}>{pct}%</div>
-    </div>
-  );
-}
-
-const VIRAL_COLORS = { high: "#22c55e", medium: "#f59e0b", low: "#ef4444" };
-
-function ViralScore({ score }) {
-  const color = score >= 7 ? VIRAL_COLORS.high : score >= 4 ? VIRAL_COLORS.medium : VIRAL_COLORS.low;
-  const label = score >= 7 ? "Viral" : score >= 4 ? "Moyen" : "Faible";
-  return (
-    <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 6 }}>
-      <div style={{ background: color + "22", border: "1px solid " + color, borderRadius: 99, padding: "2px 10px", fontSize: 11, fontWeight: 700, color }}>
-        🔥 {score}/10 — {label}
-      </div>
-    </div>
-  );
-}
+const s = {
+  shell: { maxWidth: 820, margin: "0 auto", fontFamily: "Inter,system-ui,sans-serif" },
+  topbar: { background: "var(--color-background-primary,#fff)", borderBottom: "0.5px solid var(--color-border-tertiary,#e5e7eb)", padding: "12px 20px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, flexWrap: "wrap" },
+  logoRow: { display: "flex", alignItems: "center", gap: 10 },
+  logoBox: { width: 32, height: 32, borderRadius: 8, background: "#7F77DD", display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontWeight: 700, fontSize: 13 },
+  logoName: { fontSize: 15, fontWeight: 600, color: "var(--color-text-primary,#111)" },
+  logoBadge: { fontSize: 10, padding: "2px 8px", borderRadius: 99, background: "#EEEDFE", color: "#534AB7", border: "0.5px solid #AFA9EC" },
+  topRight: { display: "flex", alignItems: "center", gap: 10 },
+  lastFetch: { fontSize: 11, color: "var(--color-text-secondary,#6b7280)" },
+  langBtn: (active) => ({ fontSize: 11, fontWeight: 600, padding: "4px 10px", borderRadius: 99, border: "0.5px solid " + (active ? "#7F77DD" : "var(--color-border-secondary,#d1d5db)"), background: active ? "#EEEDFE" : "transparent", color: active ? "#534AB7" : "var(--color-text-secondary,#6b7280)", cursor: "pointer" }),
+  main: { padding: "18px 20px" },
+  fetchBtn: (loading) => ({ width: "100%", padding: "11px", background: loading ? "var(--color-background-secondary,#f3f4f6)" : "#7F77DD", color: loading ? "var(--color-text-secondary,#6b7280)" : "#fff", border: "none", borderRadius: 10, fontSize: 13, fontWeight: 600, cursor: loading ? "not-allowed" : "pointer", marginBottom: 14, display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }),
+  tabs: { display: "flex", gap: 3, background: "var(--color-background-secondary,#f3f4f6)", border: "0.5px solid var(--color-border-tertiary,#e5e7eb)", borderRadius: 10, padding: 3, marginBottom: 14 },
+  tab: (active) => ({ flex: 1, padding: "6px 2px", fontSize: 11, fontWeight: 500, border: active ? "0.5px solid var(--color-border-tertiary,#e5e7eb)" : "none", borderRadius: 8, cursor: "pointer", color: active ? "var(--color-text-primary,#111)" : "var(--color-text-secondary,#6b7280)", background: active ? "var(--color-background-primary,#fff)" : "transparent" }),
+  card: { background: "var(--color-background-primary,#fff)", border: "0.5px solid var(--color-border-tertiary,#e5e7eb)", borderRadius: 12, padding: "14px 16px", marginBottom: 10 },
+  cardTop: { display: "flex", gap: 10, alignItems: "flex-start", marginBottom: 10 },
+  catBadge: (type) => { const m = { "Data Breach": ["#FAECE7","#993C1D","#F0997B"], "Crypto Kidnapping": ["#FAEEDA","#854F0B","#EF9F27"], "Corporate Security": ["#E6F1FB","#185FA5","#85B7EB"] }[type] || ["#F1EFE8","#5F5E5A","#B4B2A9"]; return { fontSize: 10, fontWeight: 500, padding: "2px 8px", borderRadius: 99, whiteSpace: "nowrap", flexShrink: 0, marginTop: 2, background: m[0], color: m[1], border: "0.5px solid " + m[2] }; },
+  title: { fontSize: 13, fontWeight: 600, color: "var(--color-text-primary,#111)", lineHeight: 1.4, marginBottom: 3 },
+  summary: { fontSize: 12, color: "var(--color-text-secondary,#6b7280)", lineHeight: 1.5 },
+  meta: { display: "flex", gap: 10, marginTop: 5, flexWrap: "wrap", alignItems: "center" },
+  source: { fontSize: 11, color: "var(--color-text-secondary,#6b7280)" },
+  trend: { fontSize: 11, color: "#1D9E75" },
+  viralBadge: (score) => { const h = score >= 7; const m = score >= 4; return { fontSize: 10, fontWeight: 600, padding: "2px 9px", borderRadius: 99, background: h ? "#EAF3DE" : m ? "#FAEEDA" : "#FAECE7", color: h ? "#3B6D11" : m ? "#854F0B" : "#993C1D", border: "0.5px solid " + (h ? "#97C459" : m ? "#EF9F27" : "#F0997B") }; },
+  divider: { height: "0.5px", background: "var(--color-border-tertiary,#e5e7eb)", margin: "10px 0" },
+  actionRow: { display: "flex", gap: 5, flexWrap: "wrap" },
+  actionBtn: (active) => ({ fontSize: 11, padding: "4px 10px", border: "0.5px solid " + (active ? "#7F77DD" : "var(--color-border-secondary,#d1d5db)"), borderRadius: 8, background: active ? "#EEEDFE" : "var(--color-background-secondary,#f3f4f6)", color: active ? "#534AB7" : "var(--color-text-primary,#111)", cursor: "pointer", fontWeight: active ? 600 : 400 }),
+  exportBtn: { fontSize: 11, padding: "4px 10px", border: "0.5px solid #5DCAA5", borderRadius: 8, background: "#E1F5EE", color: "#0F6E56", cursor: "pointer", fontWeight: 600, marginLeft: "auto" },
+  outBox: { marginTop: 10, background: "var(--color-background-secondary,#f3f4f6)", border: "0.5px solid var(--color-border-tertiary,#e5e7eb)", borderRadius: 8, padding: "10px 12px" },
+  outHdr: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 7 },
+  outLabel: { fontSize: 11, fontWeight: 600, color: "var(--color-text-primary,#111)" },
+  copyBtn: { fontSize: 10, padding: "2px 8px", border: "0.5px solid var(--color-border-secondary,#d1d5db)", borderRadius: 6, background: "transparent", cursor: "pointer", color: "var(--color-text-secondary,#6b7280)" },
+  outText: { fontSize: 12, color: "var(--color-text-secondary,#6b7280)", lineHeight: 1.7, whiteSpace: "pre-wrap", maxHeight: 280, overflowY: "auto" },
+  errBox: { background: "#FAECE7", border: "0.5px solid #F0997B", borderRadius: 8, padding: "8px 12px", fontSize: 11, color: "#993C1D", marginTop: 8 },
+  sectionCard: { background: "var(--color-background-primary,#fff)", border: "0.5px solid var(--color-border-tertiary,#e5e7eb)", borderRadius: 12, padding: "14px 16px", marginBottom: 10 },
+  sectionTitle: { fontSize: 13, fontWeight: 600, color: "var(--color-text-primary,#111)", marginBottom: 10 },
+  sectionBtn: (color) => ({ width: "100%", padding: "9px", border: "0.5px solid var(--color-border-secondary,#d1d5db)", borderRadius: 8, background: "var(--color-background-secondary,#f3f4f6)", fontSize: 12, fontWeight: 500, cursor: "pointer", color: "var(--color-text-primary,#111)", display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }),
+  progressWrap: { margin: "8px 0" },
+  progressLabel: { fontSize: 11, color: "var(--color-text-secondary,#6b7280)", marginBottom: 4 },
+  progressTrack: { height: 4, background: "var(--color-background-secondary,#f3f4f6)", borderRadius: 99, overflow: "hidden", border: "0.5px solid var(--color-border-tertiary,#e5e7eb)" },
+  progressFill: (pct) => ({ height: "100%", background: "#7F77DD", borderRadius: 99, width: pct + "%", transition: "width 0.3s ease" }),
+  statRow: { display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 8, marginBottom: 10 },
+  statCard: { background: "var(--color-background-secondary,#f3f4f6)", borderRadius: 8, padding: "10px 12px" },
+  statLabel: { fontSize: 10, color: "var(--color-text-secondary,#6b7280)", marginBottom: 3 },
+  statVal: { fontSize: 18, fontWeight: 600, color: "var(--color-text-primary,#111)" },
+  htGrid: { display: "flex", flexWrap: "wrap", gap: 5, marginTop: 6 },
+  htBadge: (type) => { const m = { fr: ["#EEEDFE","#534AB7","#AFA9EC"], en: ["#E6F1FB","#185FA5","#85B7EB"], trend: ["#E1F5EE","#0F6E56","#5DCAA5"] }[type]; return { fontSize: 11, padding: "3px 10px", borderRadius: 99, background: m[0], color: m[1], border: "0.5px solid " + m[2] }; },
+  calDay: { border: "0.5px solid var(--color-border-tertiary,#e5e7eb)", borderRadius: 8, padding: "10px 12px", marginBottom: 6, display: "flex", gap: 12, alignItems: "flex-start" },
+  calNum: { fontSize: 10, fontWeight: 600, background: "var(--color-background-secondary,#f3f4f6)", borderRadius: 6, padding: "4px 8px", color: "var(--color-text-secondary,#6b7280)", whiteSpace: "nowrap", flexShrink: 0 },
+  calPlatform: (p) => { const m = { TikTok: ["#FAECE7","#993C1D"], Instagram: ["#FBEAF0","#993556"], YouTube: ["#FCEBEB","#A32D2D"], X: ["#E1F5EE","#0F6E56"] }[p] || ["#F1EFE8","#5F5E5A"]; return { fontSize: 10, padding: "2px 7px", borderRadius: 99, background: m[0], color: m[1], display: "inline-block", marginBottom: 3 }; },
+  recapBtn: { width: "100%", padding: "10px", border: "0.5px solid #AFA9EC", borderRadius: 10, background: "#EEEDFE", color: "#534AB7", fontSize: 12, fontWeight: 600, cursor: "pointer", margin: "10px 0" },
+  input: { width: "100%", padding: "9px 12px", border: "0.5px solid var(--color-border-secondary,#d1d5db)", borderRadius: 8, fontSize: 12, color: "var(--color-text-primary,#111)", background: "var(--color-background-primary,#fff)", marginBottom: 8, outline: "none" },
+  textarea: { width: "100%", padding: "9px 12px", border: "0.5px solid var(--color-border-secondary,#d1d5db)", borderRadius: 8, fontSize: 12, color: "var(--color-text-primary,#111)", background: "var(--color-background-primary,#fff)", marginBottom: 8, outline: "none", resize: "vertical", minHeight: 72, fontFamily: "inherit" },
+  projCard: { background: "var(--color-background-primary,#fff)", border: "0.5px solid var(--color-border-tertiary,#e5e7eb)", borderRadius: 12, padding: "14px 16px", marginBottom: 10 },
+  projHeader: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 4 },
+  projName: { fontSize: 13, fontWeight: 600, color: "var(--color-text-primary,#111)" },
+  projTopic: { fontSize: 11, padding: "2px 8px", borderRadius: 99, background: "#EEEDFE", color: "#534AB7", border: "0.5px solid #AFA9EC" },
+  projDesc: { fontSize: 12, color: "var(--color-text-secondary,#6b7280)", marginBottom: 10, lineHeight: 1.5 },
+  primaryBtn: { padding: "9px 16px", background: "#7F77DD", color: "#fff", border: "none", borderRadius: 8, fontSize: 12, fontWeight: 600, cursor: "pointer" },
+  secondaryBtn: { padding: "9px 16px", background: "var(--color-background-secondary,#f3f4f6)", color: "var(--color-text-primary,#111)", border: "0.5px solid var(--color-border-secondary,#d1d5db)", borderRadius: 8, fontSize: 12, fontWeight: 500, cursor: "pointer" },
+  infoBox: { background: "#EEEDFE", border: "0.5px solid #AFA9EC", borderRadius: 8, padding: "8px 12px", fontSize: 11, color: "#534AB7", marginBottom: 10 },
+};
 
 const SEED_NEWS = [
-  { title: "PowerSchool breach exposes 62M student records", summary: "A credential-stuffing attack exposed names, addresses and medical notes for millions of students across North America.", source: "BleepingComputer", category: "Data Breach", viral: 8, trend: "📈 +340% searches" },
-  { title: "French healthcare data of 33M citizens leaked", summary: "Health insurance data including names and SSNs appeared on underground forums after a breach at a payment processor.", source: "Le Monde", category: "Data Breach", viral: 9, trend: "📈 +520% searches" },
-  { title: "Manhattan crypto exec assaulted in home invasion", summary: "A known Bitcoin holder was attacked by masked intruders demanding wallet access.", source: "CoinDesk", category: "Crypto Kidnapping", viral: 9, trend: "📈 +780% searches" },
-  { title: "Barcelona trader kidnapped, forced to transfer 400K euros", summary: "A Spanish crypto trader was held for three days until transferring funds under duress.", source: "Reuters", category: "Crypto Kidnapping", viral: 8, trend: "📈 +410% searches" },
-  { title: "Fortinet VPN zero-day exploited before patch", summary: "A critical RCE flaw in enterprise VPN was weaponised for weeks before a fix was released.", source: "SecurityWeek", category: "Corporate Security", viral: 6, trend: "📈 +190% searches" },
-  { title: "SAP NetWeaver flaw exploited by Chinese APT", summary: "An RCE flaw in SAP software was used in targeted attacks against European manufacturers.", source: "Mandiant", category: "Corporate Security", viral: 7, trend: "📈 +230% searches" },
+  { title: "33 millions de Français exposés après une fuite chez un prestataire santé", summary: "Des données d'assurance maladie ont fuité sur des forums souterrains après une compromission chez un prestataire de paiement.", source: "Le Monde", category: "Data Breach", viral: 9, trend: "↑ +520%" },
+  { title: "PowerSchool : 62M de dossiers scolaires compromis par credential stuffing", summary: "Une attaque par bourrage de credentials a exposé noms, adresses et données médicales de millions d'élèves en Amérique du Nord.", source: "BleepingComputer", category: "Data Breach", viral: 8, trend: "↑ +340%" },
+  { title: "Investisseur Bitcoin séquestré à Manhattan, contraint de virer ses fonds", summary: "Un détenteur de Bitcoin connu a été agressé à domicile par des individus masqués exigeant l'accès à son wallet.", source: "CoinDesk", category: "Crypto Kidnapping", viral: 9, trend: "↑ +780%" },
+  { title: "Trader crypto barcelonais kidnappé 3 jours, 400K€ transférés de force", summary: "Un trader espagnol a été séquestré pendant 72h et contraint de transférer des fonds. Quatre suspects liés au crime organisé arrêtés.", source: "Reuters", category: "Crypto Kidnapping", viral: 8, trend: "↑ +410%" },
+  { title: "Zero-day Fortinet VPN exploité des semaines avant le patch", summary: "Une faille RCE critique dans un VPN d'entreprise très répandu a été weaponisée pendant plusieurs semaines avant la publication du correctif.", source: "SecurityWeek", category: "Corporate Security", viral: 6, trend: "↑ +190%" },
+  { title: "Faille SAP NetWeaver exploitée par un APT chinois contre des industriels européens", summary: "Une RCE dans SAP a servi de vecteur d'attaque ciblée contre des fabricants européens, attribuée à un acteur étatique chinois.", source: "Mandiant", category: "Corporate Security", viral: 7, trend: "↑ +230%" },
 ];
 
-const BTNS = [
-  { key: "script", label: "🎙️ Script ElevenLabs" },
-  { key: "image",  label: "🖼️ Image Prompt" },
-  { key: "post",   label: "📱 Post Copy" },
-  { key: "blog",   label: "✍️ Blog" },
-  { key: "thread", label: "🧵 Thread X" },
-  { key: "formats",label: "🔁 Variations" },
-];
+const BTN_KEYS = ["script","image","post","blog","thread","formats"];
 
-function NewsCard({ item }) {
+function Progress({ label, pct }) {
+  return (
+    <div style={s.progressWrap}>
+      <div style={s.progressLabel}>{label}</div>
+      <div style={s.progressTrack}><div style={s.progressFill(pct)} /></div>
+    </div>
+  );
+}
+
+function NewsCard({ item, lang }) {
+  const t = T[lang];
   const [open, setOpen] = useState(null);
   const [cache, setCache] = useState({});
   const [loading, setLoading] = useState(null);
   const [err, setErr] = useState(null);
   const [prog, setProg] = useState(0);
 
-  const generate = async (type) => {
+  const gen = async (type) => {
     if (cache[type]) { setOpen(type); return; }
     setLoading(type); setErr(null); setProg(10);
-    const tick = setInterval(() => setProg(p => Math.min(p + 8, 85)), 400);
+    const tick = setInterval(() => setProg(p => Math.min(p+8,85)), 400);
     const b = item.title + " - " + item.summary;
-    const tone = "Ton: vulgarisation grand public, accessible, accrocheur. Marque: BustedData.";
-    const prompts = {
-      script: tone + " Based on: " + b + "\nWrite bilingual ElevenLabs voiceover script 60s.\nFRENCH (30s): hook choc / faits clés / insight\nENGLISH (30s): same\nELEVENLABS SETTINGS: voice, pace, emotion tags\nPlain text only.",
-      image: "Based on: " + b + "\nIMAGE PROMPT: cinematic dark-tech Midjourney/DALL-E, no text in image.\nCOLOR PALETTE: 3 hex\nTEXT OVERLAY: headline thumbnail BustedData\nPlain text only.",
-      post: tone + " Based on: " + b + "\nBilingual social copy:\nINSTAGRAM FR/EN: hook+body+hashtags\nYOUTUBE FR/EN: title+description+tags\nTIKTOK FR/EN: hook+caption+hashtags\nPlain text only.",
-      blog: tone + " Based on: " + b + "\nBlog article FR then EN.\nFR: TITRE/CHAPEAU/CONTEXTE/ANALYSE/POINTS CLES/CONCLUSION/META/TAGS\nEN: TITLE/INTRO/BACKGROUND/ANALYSIS/KEY TAKEAWAYS/CONCLUSION/META/TAGS\nPlain text only.",
-      thread: tone + " Based on: " + b + "\nCreate a viral Twitter/X thread in French AND English.\nFR THREAD: 7 tweets numbered, hook tweet 1, facts 2-5, insight 6, CTA 7. Max 280 chars each.\nEN THREAD: same structure.\nPlain text only.",
-      formats: tone + " Based on: " + b + "\nGenerate 3 content format variations:\nFORMAT 1 - TIKTOK 15s: ultra-short hook script\nFORMAT 2 - YOUTUBE 60s: full script with intro/body/outro\nFORMAT 3 - CARROUSEL INSTAGRAM: 5 slides titles + captions\nAll bilingual FR/EN. Plain text only.",
+    const tone = "Tone: vulgarisation grand public, accessible, punchy. Brand: BustedData.";
+    const P = {
+      script: tone+" News: "+b+"\nBilingual ElevenLabs script 60s.\nFR (30s): hook/facts/insight\nEN (30s): same\nELEVENLABS: voice,pace,emotion\nPlain text.",
+      image: "News: "+b+"\nIMAGE PROMPT: cinematic dark-tech Midjourney/DALL-E, no text.\nCOLOR PALETTE: 3 hex\nTEXT OVERLAY: thumbnail headline\nPlain text.",
+      post: tone+" News: "+b+"\nBilingual social copy:\nINSTAGRAM FR/EN: hook+body+hashtags\nYOUTUBE FR/EN: title+desc+tags\nTIKTOK FR/EN: hook+caption+hashtags\nPlain text.",
+      blog: tone+" News: "+b+"\nFull blog FR then EN.\nFR: TITRE/CHAPEAU/CONTEXTE/ANALYSE/POINTS CLES/CONCLUSION/META/TAGS\nEN: TITLE/INTRO/BACKGROUND/ANALYSIS/TAKEAWAYS/CONCLUSION/META/TAGS\nPlain text.",
+      thread: tone+" News: "+b+"\nViral X thread FR AND EN.\nFR THREAD: 7 tweets numbered, hook t1, facts t2-5, insight t6, CTA t7. Max 280 chars each.\nEN THREAD: same.\nPlain text.",
+      formats: tone+" News: "+b+"\n3 variations:\nFORMAT 1 - TIKTOK 15s: ultra-short script\nFORMAT 2 - YOUTUBE 60s: intro/body/outro\nFORMAT 3 - CARROUSEL IG: 5 slides titles+captions\nAll FR/EN. Plain text.",
     };
     try {
-      const text = await askClaude(prompts[type]);
+      const text = await askClaude(P[type]);
       clearInterval(tick); setProg(100);
-      setCache(prev => ({ ...prev, [type]: text }));
+      setCache(c => ({ ...c, [type]: text }));
       setOpen(type);
-    } catch (e) { clearInterval(tick); setProg(0); setErr(e.message); }
+    } catch(e) { clearInterval(tick); setProg(0); setErr(e.message); }
     setLoading(null);
   };
 
   const exportPack = () => {
     const keys = Object.keys(cache);
-    if (!keys.length) { alert("Generate at least one content first."); return; }
-    let txt = "=== BUSTEDDATA CONTENT PACK ===\n";
-    txt += "News: " + item.title + "\n";
-    txt += "Category: " + item.category + " | Viral Score: " + (item.viral || "N/A") + "/10\n";
-    txt += "=".repeat(50) + "\n\n";
-    keys.forEach(k => { txt += "--- " + (BTNS.find(b=>b.key===k)||{label:k}).label + " ---\n" + cache[k] + "\n\n"; });
-    const blob = new Blob([txt], { type: "text/plain" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url; a.download = item.title.slice(0,30).replace(/[^a-z0-9]/gi,"_") + "_pack.txt";
-    a.click(); URL.revokeObjectURL(url);
+    if (!keys.length) return;
+    let txt = "=== BUSTEDDATA CONTENT PACK ===\nNews: "+item.title+"\nScore: "+item.viral+"/10\n" + "=".repeat(40) + "\n\n";
+    keys.forEach(k => { txt += "--- " + t.btns[BTN_KEYS.indexOf(k)] + " ---\n" + cache[k] + "\n\n"; });
+    const a = Object.assign(document.createElement("a"), { href: URL.createObjectURL(new Blob([txt],{type:"text/plain"})), download: item.title.slice(0,30).replace(/[^a-z0-9]/gi,"_")+"_pack.txt" });
+    a.click();
   };
 
+  const viralLabel = item.viral >= 7 ? t.viral[2] : item.viral >= 4 ? t.viral[1] : t.viral[0];
+
   return (
-    <div style={{ background:"#1a1a2e", border:"1px solid #2d2d4e", borderRadius:12, padding:"16px 20px", marginBottom:14 }}>
-      <div style={{ display:"flex", gap:10, alignItems:"flex-start", marginBottom:10 }}>
-        <span style={{ background:"#7c3aed22", color:"#a78bfa", fontSize:11, fontWeight:700, padding:"3px 8px", borderRadius:6, whiteSpace:"nowrap", marginTop:2, flexShrink:0 }}>{item.category}</span>
-        <div style={{ flex:1 }}>
-          <div style={{ color:"#e2e8f0", fontWeight:600, fontSize:14, lineHeight:1.4 }}>{item.title}</div>
-          <div style={{ color:"#94a3b8", fontSize:13, marginTop:4 }}>{item.summary}</div>
-          <div style={{ display:"flex", gap:12, marginTop:6, flexWrap:"wrap" }}>
-            <div style={{ color:"#64748b", fontSize:11 }}>📎 {item.source}</div>
-            {item.trend && <div style={{ color:"#22d3ee", fontSize:11 }}>{item.trend}</div>}
+    <div style={s.card}>
+      <div style={s.cardTop}>
+        <span style={s.catBadge(item.category)}>{item.category}</span>
+        <div style={{flex:1}}>
+          <div style={s.title}>{item.title}</div>
+          <div style={s.summary}>{item.summary}</div>
+          <div style={s.meta}>
+            <span style={s.source}>{item.source}</span>
+            {item.trend && <span style={s.trend}>{item.trend}</span>}
+            <span style={s.viralBadge(item.viral)}>{item.viral}/10 — {viralLabel}</span>
           </div>
-          {item.viral && <ViralScore score={item.viral} />}
         </div>
       </div>
-
-      <div style={{ display:"flex", gap:6, flexWrap:"wrap", marginBottom:8 }}>
-        {BTNS.map(btn => (
-          <button key={btn.key} onClick={() => generate(btn.key)} disabled={!!loading}
-            style={{ background: open===btn.key?"#7c3aed":"#2d2d4e", color:"#e2e8f0", border:"none", borderRadius:8, padding:"5px 11px", fontSize:11, cursor:loading?"not-allowed":"pointer", fontWeight:500, opacity:loading&&loading!==btn.key?0.5:1 }}>
-            {loading===btn.key ? "⏳" : btn.label}
+      <div style={s.divider} />
+      <div style={s.actionRow}>
+        {BTN_KEYS.map((k,i) => (
+          <button key={k} onClick={() => gen(k)} disabled={!!loading} style={s.actionBtn(open===k)}>
+            {loading===k ? "⏳" : t.btns[i]}
           </button>
         ))}
-        <button onClick={exportPack} style={{ background:"#064e3b", color:"#6ee7b7", border:"1px solid #065f46", borderRadius:8, padding:"5px 11px", fontSize:11, cursor:"pointer", fontWeight:600 }}>
-          📦 Export Pack
-        </button>
+        <button onClick={exportPack} style={s.exportBtn}>↓ {t.export}</button>
       </div>
-
-      {loading && <ProgressBar label={"Generating " + (BTNS.find(b=>b.key===loading)||{}).label + "..."} pct={prog} />}
-      {err && <div style={{ background:"#2d1515", border:"1px solid #7f1d1d", borderRadius:8, padding:"10px 14px", fontSize:12, color:"#fca5a5", marginTop:8 }}>{err}</div>}
-
+      {loading && <Progress label={t.btns[BTN_KEYS.indexOf(loading)] + "..."} pct={prog} />}
+      {err && <div style={s.errBox}>{err}</div>}
       {open && cache[open] && (
-        <div style={{ marginTop:12, background:"#0f0f1a", borderRadius:8, padding:14, fontSize:13, color:"#cbd5e1", whiteSpace:"pre-wrap", lineHeight:1.7, maxHeight:340, overflowY:"auto", border:"1px solid #2d2d4e" }}>
-          <div style={{ display:"flex", justifyContent:"space-between", marginBottom:8 }}>
-            <span style={{ color:"#a78bfa", fontWeight:600, fontSize:12 }}>{(BTNS.find(b=>b.key===open)||{}).label}</span>
-            <button onClick={() => navigator.clipboard.writeText(cache[open])} style={{ background:"none", border:"1px solid #2d2d4e", color:"#94a3b8", borderRadius:4, padding:"2px 8px", fontSize:11, cursor:"pointer" }}>Copy</button>
+        <div style={s.outBox}>
+          <div style={s.outHdr}>
+            <span style={s.outLabel}>{t.btns[BTN_KEYS.indexOf(open)]}</span>
+            <button style={s.copyBtn} onClick={() => navigator.clipboard.writeText(cache[open])}>{t.copy}</button>
           </div>
-          {cache[open]}
+          <div style={s.outText}>{cache[open]}</div>
         </div>
       )}
     </div>
   );
 }
 
-function HashtagTracker({ news }) {
-  const [tags, setTags] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [prog, setProg] = useState(0);
-
-  const generate = async () => {
-    setLoading(true); setProg(10);
-    const tick = setInterval(() => setProg(p => Math.min(p+9,85)), 400);
-    const titles = news.map(n=>n.title).join(", ");
-    try {
-      const text = await askClaude("Based on these security news topics: " + titles + "\n\nGenerate a hashtag strategy for BustedData (vulgarisation grand public).\n\nFR HASHTAGS: 10 hashtags French ranked by potential reach (data security, cyber, vie privée)\nEN HASHTAGS: 10 hashtags English ranked by potential reach\nTRENDING NOW: 5 hashtags currently trending related to these topics\nTO AVOID: 3 overused/shadowbanned hashtags\n\nPlain text only.");
-      clearInterval(tick); setProg(100); setTags(text);
-    } catch(e) { clearInterval(tick); setProg(0); setTags("Error: "+e.message); }
-    setLoading(false);
-  };
-
+function SectionBlock({ title, btnLabel, onGenerate, loading, prog, result, lang, color }) {
+  const t = T[lang];
   return (
-    <div style={{ background:"#1a1a2e", border:"1px solid #2d2d4e", borderRadius:12, padding:"16px 20px", marginBottom:14 }}>
-      <div style={{ color:"#e2e8f0", fontWeight:600, fontSize:14, marginBottom:10 }}>🏷️ Hashtag Tracker BustedData</div>
-      <button onClick={generate} disabled={loading} style={{ background:"#1e293b", color:"#22d3ee", border:"1px solid #164e63", borderRadius:8, padding:"8px 16px", fontSize:12, fontWeight:600, cursor:"pointer", width:"100%", marginBottom:8 }}>
-        {loading ? "⏳ Analysing..." : "🔍 Generate Hashtag Strategy"}
+    <div style={s.sectionCard}>
+      <div style={s.sectionTitle}>{title}</div>
+      <button onClick={onGenerate} disabled={loading} style={s.sectionBtn()}>
+        {loading ? "⏳ " + t.generating : btnLabel}
       </button>
-      {loading && <ProgressBar label="Analysing trends..." pct={prog} />}
-      {tags && (
-        <div style={{ background:"#0f0f1a", borderRadius:8, padding:14, fontSize:13, color:"#cbd5e1", whiteSpace:"pre-wrap", lineHeight:1.8, border:"1px solid #2d2d4e" }}>
-          <div style={{ display:"flex", justifyContent:"space-between", marginBottom:8 }}>
-            <span style={{ color:"#22d3ee", fontWeight:600, fontSize:12 }}>🏷️ Hashtag Strategy</span>
-            <button onClick={() => navigator.clipboard.writeText(tags)} style={{ background:"none", border:"1px solid #2d2d4e", color:"#94a3b8", borderRadius:4, padding:"2px 8px", fontSize:11, cursor:"pointer" }}>Copy</button>
+      {loading && <Progress label={t.generating} pct={prog} />}
+      {result && (
+        <div style={s.outBox}>
+          <div style={s.outHdr}>
+            <span style={s.outLabel}>{title}</span>
+            <button style={s.copyBtn} onClick={() => navigator.clipboard.writeText(result)}>{t.copy}</button>
           </div>
-          {tags}
+          <div style={s.outText}>{result}</div>
         </div>
       )}
     </div>
   );
 }
 
-function TrendAnalysis({ news }) {
-  const [analysis, setAnalysis] = useState(null);
+function HashtagTab({ news, lang }) {
+  const t = T[lang];
+  const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
   const [prog, setProg] = useState(0);
-
-  const generate = async () => {
+  const gen = async () => {
     setLoading(true); setProg(10);
     const tick = setInterval(() => setProg(p => Math.min(p+9,85)), 400);
-    const items = news.map((n,i)=>(i+1)+". ["+n.category+"] "+n.title).join("\n");
     try {
-      const text = await askClaude("Analyse these security news for BustedData (vulgarisation grand public):\n"+items+"\n\nProvide:\nTREND ANALYSIS FR: dominant themes, rising topics, audience interest (5-6 sentences)\nTREND ANALYSIS EN: same in English\nCONTENT OPPORTUNITIES: 3 unique angle ideas for BustedData not covered by mainstream media\nBEST POSTING TIME: recommended days/hours for each platform (IG, TikTok, YouTube, X)\nPlain text only.");
-      clearInterval(tick); setProg(100); setAnalysis(text);
-    } catch(e) { clearInterval(tick); setProg(0); setAnalysis("Error: "+e.message); }
+      const text = await askClaude("Hashtag strategy for BustedData (vulgarisation grand public) based on topics: "+news.map(n=>n.title).join(", ")+"\n\nFR HASHTAGS: 10 ranked by reach\nEN HASHTAGS: 10 ranked by reach\nTRENDING NOW: 5 trending related hashtags\nTO AVOID: 3 overused/shadowbanned\nPlain text.");
+      clearInterval(tick); setProg(100); setResult(text);
+    } catch(e) { clearInterval(tick); setProg(0); setResult("Error: "+e.message); }
     setLoading(false);
   };
-
-  return (
-    <div style={{ background:"#1a1a2e", border:"1px solid #2d2d4e", borderRadius:12, padding:"16px 20px", marginBottom:14 }}>
-      <div style={{ color:"#e2e8f0", fontWeight:600, fontSize:14, marginBottom:10 }}>📊 Analyse de Tendances</div>
-      <button onClick={generate} disabled={loading} style={{ background:"#1e293b", color:"#f59e0b", border:"1px solid #78350f", borderRadius:8, padding:"8px 16px", fontSize:12, fontWeight:600, cursor:"pointer", width:"100%", marginBottom:8 }}>
-        {loading ? "⏳ Analysing..." : "📈 Analyser les tendances"}
-      </button>
-      {loading && <ProgressBar label="Trend analysis in progress..." pct={prog} />}
-      {analysis && (
-        <div style={{ background:"#0f0f1a", borderRadius:8, padding:14, fontSize:13, color:"#cbd5e1", whiteSpace:"pre-wrap", lineHeight:1.8, border:"1px solid #2d2d4e" }}>
-          <div style={{ display:"flex", justifyContent:"space-between", marginBottom:8 }}>
-            <span style={{ color:"#f59e0b", fontWeight:600, fontSize:12 }}>📊 Tendances</span>
-            <button onClick={() => navigator.clipboard.writeText(analysis)} style={{ background:"none", border:"1px solid #2d2d4e", color:"#94a3b8", borderRadius:4, padding:"2px 8px", fontSize:11, cursor:"pointer" }}>Copy</button>
-          </div>
-          {analysis}
-        </div>
-      )}
-    </div>
-  );
+  return <SectionBlock title="🏷️ Hashtags" btnLabel={t.hashtags} onGenerate={gen} loading={loading} prog={prog} result={result} lang={lang} />;
 }
 
-function EditorialCalendar({ news }) {
-  const [calendar, setCalendar] = useState(null);
+function TrendsTab({ news, lang }) {
+  const t = T[lang];
+  const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
   const [prog, setProg] = useState(0);
-
-  const generate = async () => {
+  const avg = news.length ? Math.round(news.reduce((a,n)=>a+(n.viral||5),0)/news.length*10)/10 : 0;
+  const top = news.reduce((a,b)=>((b.viral||0)>(a.viral||0)?b:a),news[0]||{});
+  const gen = async () => {
     setLoading(true); setProg(10);
     const tick = setInterval(() => setProg(p => Math.min(p+9,85)), 400);
-    const items = news.map((n,i)=>(i+1)+". [Score:"+n.viral+"/10] "+n.title+" ("+n.category+")").join("\n");
     try {
-      const text = await askClaude("Create a 7-day editorial calendar for BustedData (security news vulgarisation) based on these stories:\n"+items+"\n\nFORMAT for each day:\nDAY X - [Date placeholder]\nPLATFORM: [IG/TikTok/YouTube/X]\nCONTENT: [which story + format]\nTIME: [best posting time]\nFR CAPTION HOOK: [opening line]\n\nPrioritize by viral score. Include rest days. Plain text only.");
-      clearInterval(tick); setProg(100); setCalendar(text);
-    } catch(e) { clearInterval(tick); setProg(0); setCalendar("Error: "+e.message); }
+      const text = await askClaude("Trend analysis for BustedData (vulgarisation grand public):\n"+news.map((n,i)=>(i+1)+". ["+n.category+"] "+n.title).join("\n")+"\n\nTREND ANALYSIS FR: dominant themes, rising topics (5-6 sentences)\nTREND ANALYSIS EN: same in English\nCONTENT OPPORTUNITIES: 3 unique angles for BustedData\nBEST POSTING TIME: by platform (IG/TikTok/YouTube/X)\nPlain text.");
+      clearInterval(tick); setProg(100); setResult(text);
+    } catch(e) { clearInterval(tick); setProg(0); setResult("Error: "+e.message); }
     setLoading(false);
   };
-
-  const exportCal = () => {
-    if (!calendar) return;
-    const blob = new Blob([calendar], { type: "text/plain" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a"); a.href=url; a.download="busteddata_calendar.txt"; a.click();
-    URL.revokeObjectURL(url);
-  };
-
   return (
-    <div style={{ background:"#1a1a2e", border:"1px solid #2d2d4e", borderRadius:12, padding:"16px 20px", marginBottom:14 }}>
-      <div style={{ color:"#e2e8f0", fontWeight:600, fontSize:14, marginBottom:10 }}>🗓️ Calendrier Éditorial 7 jours</div>
-      <div style={{ display:"flex", gap:8 }}>
-        <button onClick={generate} disabled={loading} style={{ background:"#1e293b", color:"#c084fc", border:"1px solid #581c87", borderRadius:8, padding:"8px 16px", fontSize:12, fontWeight:600, cursor:"pointer", flex:1, marginBottom:8 }}>
-          {loading ? "⏳ Generating..." : "🗓️ Générer le calendrier"}
+    <div>
+      <div style={s.sectionCard}>
+        <div style={s.statRow}>
+          <div style={s.statCard}><div style={s.statLabel}>Stories</div><div style={s.statVal}>{news.length}</div></div>
+          <div style={s.statCard}><div style={s.statLabel}>{lang==="fr"?"Score moyen":"Avg score"}</div><div style={s.statVal}>{avg}</div></div>
+          <div style={s.statCard}><div style={s.statLabel}>{lang==="fr"?"Top sujet":"Top topic"}</div><div style={{...s.statVal,fontSize:11,paddingTop:4}}>{top.category||"—"}</div></div>
+        </div>
+        <button onClick={gen} disabled={loading} style={s.sectionBtn()}>
+          {loading ? "⏳ "+t.generating : "📈 "+t.analyse}
         </button>
-        {calendar && <button onClick={exportCal} style={{ background:"#064e3b", color:"#6ee7b7", border:"1px solid #065f46", borderRadius:8, padding:"8px 14px", fontSize:12, fontWeight:600, cursor:"pointer" }}>⬇️</button>}
-      </div>
-      {loading && <ProgressBar label="Building editorial calendar..." pct={prog} />}
-      {calendar && (
-        <div style={{ background:"#0f0f1a", borderRadius:8, padding:14, fontSize:13, color:"#cbd5e1", whiteSpace:"pre-wrap", lineHeight:1.8, maxHeight:400, overflowY:"auto", border:"1px solid #2d2d4e" }}>
-          <div style={{ display:"flex", justifyContent:"space-between", marginBottom:8 }}>
-            <span style={{ color:"#c084fc", fontWeight:600, fontSize:12 }}>🗓️ Editorial Calendar</span>
-            <button onClick={() => navigator.clipboard.writeText(calendar)} style={{ background:"none", border:"1px solid #2d2d4e", color:"#94a3b8", borderRadius:4, padding:"2px 8px", fontSize:11, cursor:"pointer" }}>Copy</button>
+        {loading && <Progress label={t.generating} pct={prog} />}
+        {result && (
+          <div style={s.outBox}>
+            <div style={s.outHdr}><span style={s.outLabel}>📈 Tendances</span><button style={s.copyBtn} onClick={()=>navigator.clipboard.writeText(result)}>{t.copy}</button></div>
+            <div style={s.outText}>{result}</div>
           </div>
-          {calendar}
+        )}
+      </div>
+    </div>
+  );
+}
+
+function CalendarTab({ news, lang }) {
+  const t = T[lang];
+  const [result, setResult] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [prog, setProg] = useState(0);
+  const gen = async () => {
+    setLoading(true); setProg(10);
+    const tick = setInterval(() => setProg(p => Math.min(p+9,85)), 400);
+    try {
+      const text = await askClaude("7-day editorial calendar for BustedData (vulgarisation grand public):\n"+news.map((n,i)=>(i+1)+". ["+n.viral+"/10] "+n.title+" ("+n.category+")").join("\n")+"\n\nFor each day: DAY X / PLATFORM / CONTENT / POSTING TIME / FR HOOK\nPrioritize by viral score. Plain text.");
+      clearInterval(tick); setProg(100); setResult(text);
+    } catch(e) { clearInterval(tick); setProg(0); setResult("Error: "+e.message); }
+    setLoading(false);
+  };
+  const dl = () => { if (!result) return; const a = Object.assign(document.createElement("a"),{href:URL.createObjectURL(new Blob([result],{type:"text/plain"})),download:"busteddata_calendar.txt"}); a.click(); };
+  return (
+    <div style={s.sectionCard}>
+      <div style={s.sectionTitle}>🗓️ {t.tabs[3]}</div>
+      <div style={{display:"flex",gap:8}}>
+        <button onClick={gen} disabled={loading} style={{...s.sectionBtn(),flex:1}}>
+          {loading ? "⏳ "+t.generating : "🗓️ "+t.calendar}
+        </button>
+        {result && <button onClick={dl} style={{...s.secondaryBtn,padding:"9px 14px"}}>↓</button>}
+      </div>
+      {loading && <Progress label={t.generating} pct={prog} />}
+      {result && (
+        <div style={s.outBox}>
+          <div style={s.outHdr}><span style={s.outLabel}>🗓️ Calendrier</span><button style={s.copyBtn} onClick={()=>navigator.clipboard.writeText(result)}>{t.copy}</button></div>
+          <div style={s.outText}>{result}</div>
         </div>
       )}
+    </div>
+  );
+}
+
+function ProjectsTab({ lang }) {
+  const t = T[lang];
+  const [projects, setProjects] = useState([]);
+  const [showForm, setShowForm] = useState(false);
+  const [form, setForm] = useState({ name: "", topic: "", desc: "" });
+  const [activeProj, setActiveProj] = useState(null);
+  const [searchLoading, setSearchLoading] = useState(false);
+  const [searchProg, setSearchProg] = useState(0);
+  const [searchResult, setSearchResult] = useState(null);
+
+  const save = () => {
+    if (!form.name.trim()) return;
+    setProjects(prev => [...prev, { ...form, id: Date.now(), results: [] }]);
+    setForm({ name: "", topic: "", desc: "" });
+    setShowForm(false);
+  };
+
+  const search = async (proj) => {
+    setActiveProj(proj.id);
+    setSearchLoading(true); setSearchProg(10); setSearchResult(null);
+    const tick = setInterval(() => setSearchProg(p => Math.min(p+8,85)), 400);
+    try {
+      const text = await askClaude("You are a content strategist for BustedData. Project: \""+proj.name+"\". Topic: \""+proj.topic+"\". Brief: \""+proj.desc+"\".\n\nGenerate:\n1. 5 recent news angles on this topic (title + 2-sentence summary each)\n2. Content recommendations: best format, tone, platform for this topic\n3. 3 post ideas ready to produce (FR + EN hook for each)\nPlain text.");
+      clearInterval(tick); setSearchProg(100); setSearchResult(text);
+    } catch(e) { clearInterval(tick); setSearchProg(0); setSearchResult("Error: "+e.message); }
+    setSearchLoading(false);
+  };
+
+  return (
+    <div>
+      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12}}>
+        <span style={{fontSize:13,fontWeight:600,color:"var(--color-text-primary,#111)"}}>
+          {lang==="fr"?"Vos projets":"Your projects"} ({projects.length})
+        </span>
+        <button onClick={() => setShowForm(!showForm)} style={s.primaryBtn}>
+          + {t.addProject}
+        </button>
+      </div>
+
+      {showForm && (
+        <div style={{...s.sectionCard, border:"0.5px solid #AFA9EC"}}>
+          <div style={s.sectionTitle}>+ {t.addProject}</div>
+          <input style={s.input} placeholder={t.projectName} value={form.name} onChange={e=>setForm(f=>({...f,name:e.target.value}))} />
+          <input style={s.input} placeholder={t.projectTopic} value={form.topic} onChange={e=>setForm(f=>({...f,topic:e.target.value}))} />
+          <textarea style={s.textarea} placeholder={t.projectPlaceholder} value={form.desc} onChange={e=>setForm(f=>({...f,desc:e.target.value}))} />
+          <div style={{display:"flex",gap:8}}>
+            <button onClick={save} style={s.primaryBtn}>{t.projectSave}</button>
+            <button onClick={()=>setShowForm(false)} style={s.secondaryBtn}>{lang==="fr"?"Annuler":"Cancel"}</button>
+          </div>
+        </div>
+      )}
+
+      {!projects.length && !showForm && (
+        <div style={{...s.sectionCard,textAlign:"center",padding:"28px 16px"}}>
+          <div style={{fontSize:24,marginBottom:8}}>📁</div>
+          <div style={{fontSize:13,color:"var(--color-text-secondary,#6b7280)"}}>{t.noProjects}</div>
+        </div>
+      )}
+
+      {projects.map(proj => (
+        <div key={proj.id} style={s.projCard}>
+          <div style={s.projHeader}>
+            <span style={s.projName}>{proj.name}</span>
+            <span style={s.projTopic}>{proj.topic}</span>
+          </div>
+          {proj.desc && <div style={s.projDesc}>{proj.desc}</div>}
+          <button onClick={() => search(proj)} disabled={searchLoading && activeProj===proj.id} style={{...s.sectionBtn(),marginBottom:0}}>
+            {searchLoading && activeProj===proj.id ? "⏳ "+t.searching : "🔍 "+t.projectSearch}
+          </button>
+          {searchLoading && activeProj===proj.id && <Progress label={t.searching} pct={searchProg} />}
+          {searchResult && activeProj===proj.id && (
+            <div style={s.outBox}>
+              <div style={s.outHdr}>
+                <span style={s.outLabel}>🔍 {proj.name}</span>
+                <button style={s.copyBtn} onClick={()=>navigator.clipboard.writeText(searchResult)}>{t.copy}</button>
+              </div>
+              <div style={s.outText}>{searchResult}</div>
+            </div>
+          )}
+        </div>
+      ))}
     </div>
   );
 }
 
 export default function Home() {
+  const [lang, setLang] = useState("fr");
   const [news, setNews] = useState([]);
   const [loading, setLoading] = useState(false);
   const [prog, setProg] = useState(0);
@@ -272,102 +435,93 @@ export default function Home() {
   const [recapProg, setRecapProg] = useState(0);
   const [lastFetch, setLastFetch] = useState(null);
   const [fetchErr, setFetchErr] = useState(null);
-  const [tab, setTab] = useState("news");
+  const [tab, setTab] = useState(0);
+  const t = T[lang];
 
   const fetchNews = async () => {
     setLoading(true); setNews([]); setRecap(""); setFetchErr(null); setProg(10);
     const tick = setInterval(() => setProg(p => Math.min(p+7,85)), 500);
     try {
-      const text = await askClaude("You are a security news analyst for BustedData (vulgarisation grand public). Rewrite these 6 incidents as polished news items and return ONLY a raw JSON array, no markdown, no code fences.\nSchema: [{\"title\":\"...\",\"summary\":\"2 sentences.\",\"source\":\"...\",\"category\":\"...\",\"viral\":NUMBER_1_TO_10,\"trend\":\"trending indicator\"}]\nCategories: Data Breach | Crypto Kidnapping | Corporate Security\n1. PowerSchool edtech breach exposed 62M student records.\n2. French healthcare breach leaked 33M citizens data.\n3. Manhattan Bitcoin holder attacked by home intruders.\n4. Barcelona crypto trader kidnapped 3 days, lost 400K euros.\n5. Fortinet VPN zero-day exploited before patch.\n6. SAP NetWeaver RCE flaw exploited by Chinese APT.\nFor viral score: rate newsworthiness 1-10 for general public. For trend: write short trending indicator like emoji + percentage.");
+      const text = await askClaude("Security news analyst for BustedData (vulgarisation grand public). Rewrite 6 incidents as polished news and return ONLY raw JSON array, no markdown.\nSchema: [{\"title\":\"...\",\"summary\":\"2 sentences.\",\"source\":\"...\",\"category\":\"...\",\"viral\":NUMBER,\"trend\":\"short indicator\"}]\nCategories: Data Breach|Crypto Kidnapping|Corporate Security\n1. PowerSchool 62M records breach.\n2. French healthcare 33M citizens leak.\n3. Manhattan Bitcoin holder home attack.\n4. Barcelona crypto trader kidnapped 3 days 400K.\n5. Fortinet VPN zero-day before patch.\n6. SAP NetWeaver Chinese APT.\nViral: 1-10 general public interest. Trend: short emoji+% string.");
       clearInterval(tick); setProg(95);
       let parsed = [];
       try { const m = text.match(/\[[\s\S]*\]/); if (m) parsed = JSON.parse(m[0]); } catch {}
-      if (!parsed.length) { parsed = SEED_NEWS; setFetchErr("Using cached news."); }
-      setNews(parsed); setLastFetch(new Date().toLocaleString("fr-FR")); setProg(100);
-    } catch(e) { clearInterval(tick); setProg(0); setFetchErr(e.message); setNews(SEED_NEWS); setLastFetch(new Date().toLocaleString("fr-FR")); }
+      if (!parsed.length) { parsed = SEED_NEWS; setFetchErr(t.cached); }
+      setNews(parsed); setLastFetch(new Date().toLocaleString(lang==="fr"?"fr-FR":"en-GB")); setProg(100);
+    } catch(e) { clearInterval(tick); setProg(0); setFetchErr(e.message); setNews(SEED_NEWS); setLastFetch(new Date().toLocaleString(lang==="fr"?"fr-FR":"en-GB")); }
     setLoading(false);
   };
 
-  const generateRecap = async () => {
-    if (!news.length) return;
+  const genRecap = async () => {
     setRecapLoading(true); setRecapProg(10);
     const tick = setInterval(() => setRecapProg(p => Math.min(p+9,85)), 400);
     const list = news.map((n,i)=>(i+1)+". ["+n.category+"] "+n.title+": "+n.summary).join("\n");
     try {
-      const text = await askClaude("BustedData daily briefing. Tone: vulgarisation grand public, punchy.\nNews:\n"+list+"\n\nRECAP DU JOUR (FR) - 5-6 sentences journalistiques, hook fort.\nDAILY BRIEFING (EN) - same.\nPlain text only.");
+      const text = await askClaude("BustedData daily briefing (vulgarisation grand public).\nNews:\n"+list+"\n\nRECAP DU JOUR (FR) — 5-6 sentences, hook fort.\nDAILY BRIEFING (EN) — same.\nPlain text.");
       clearInterval(tick); setRecapProg(100); setRecap(text);
     } catch(e) { clearInterval(tick); setRecapProg(0); setRecap("Error: "+e.message); }
     setRecapLoading(false);
   };
 
-  const TABS = [
-    { id: "news", label: "📰 News" },
-    { id: "trends", label: "📊 Tendances" },
-    { id: "hashtags", label: "🏷️ Hashtags" },
-    { id: "calendar", label: "🗓️ Calendrier" },
-  ];
-
   return (
-    <div style={{ minHeight:"100vh", background:"#0a0a15", color:"#e2e8f0", fontFamily:"Inter,sans-serif", padding:"0 0 40px" }}>
-      {/* Header */}
-      <div style={{ background:"linear-gradient(135deg,#1a1a2e,#0f0f1a)", borderBottom:"1px solid #2d2d4e", padding:"20px 24px 16px" }}>
-        <div style={{ maxWidth:780, margin:"0 auto" }}>
-          <div style={{ display:"flex", alignItems:"center", gap:10, marginBottom:4 }}>
-            <div style={{ fontSize:22, fontWeight:800, color:"#fff", letterSpacing:-0.5 }}>🛡️ BustedData</div>
-            <span style={{ background:"#7c3aed22", color:"#a78bfa", fontSize:10, fontWeight:700, padding:"2px 8px", borderRadius:99, border:"1px solid #7c3aed44" }}>INTEL DAILY</span>
-          </div>
-          <div style={{ color:"#64748b", fontSize:12 }}>Data Breaches · Crypto Attacks · Corporate Flaws — Vulgarisation Grand Public</div>
-          {lastFetch && <div style={{ color:"#475569", fontSize:11, marginTop:4 }}>🕐 Last fetch: {lastFetch}</div>}
+    <div style={s.shell}>
+      <div style={s.topbar}>
+        <div style={s.logoRow}>
+          <div style={s.logoBox}>BD</div>
+          <span style={s.logoName}>BustedData</span>
+          <span style={s.logoBadge}>Intel Daily</span>
+        </div>
+        <div style={s.topRight}>
+          {lastFetch && <span style={s.lastFetch}>{t.lastFetch}: {lastFetch}</span>}
+          <button onClick={() => setLang("fr")} style={s.langBtn(lang==="fr")}>FR</button>
+          <button onClick={() => setLang("en")} style={s.langBtn(lang==="en")}>EN</button>
         </div>
       </div>
 
-      <div style={{ maxWidth:780, margin:"0 auto", padding:"20px 24px 0" }}>
-        {/* Fetch button */}
-        <button onClick={fetchNews} disabled={loading} style={{ background:loading?"#2d2d4e":"linear-gradient(135deg,#7c3aed,#4f46e5)", color:"#fff", border:"none", borderRadius:10, padding:"12px 24px", fontSize:14, fontWeight:700, cursor:loading?"not-allowed":"pointer", width:"100%", marginBottom:8, letterSpacing:0.2 }}>
-          {loading ? "🔍 Chargement des news..." : "🔄 Fetch Today's Security News"}
+      <div style={s.main}>
+        <button onClick={fetchNews} disabled={loading} style={s.fetchBtn(loading)}>
+          {loading ? t.fetching : "↻  "+t.fetch}
         </button>
-        {loading && <ProgressBar label="Fetching & scoring news..." pct={prog} />}
-        {fetchErr && <div style={{ background:"#1e1224", border:"1px solid #7c3aed44", borderRadius:8, padding:"10px 14px", fontSize:12, color:"#c084fc", marginBottom:14 }}>ℹ️ {fetchErr}</div>}
+        {loading && <Progress label={t.fetching} pct={prog} />}
+        {fetchErr && <div style={s.infoBox}>{fetchErr}</div>}
 
-        {news.length > 0 && (
+        {(news.length > 0 || tab === 4) && (
           <>
-            {/* Tabs */}
-            <div style={{ display:"flex", gap:4, marginBottom:16, background:"#1a1a2e", borderRadius:10, padding:4, border:"1px solid #2d2d4e" }}>
-              {TABS.map(t => (
-                <button key={t.id} onClick={() => setTab(t.id)} style={{ flex:1, background:tab===t.id?"#7c3aed":"transparent", color:tab===t.id?"#fff":"#64748b", border:"none", borderRadius:7, padding:"8px 4px", fontSize:12, fontWeight:600, cursor:"pointer", transition:"all 0.2s" }}>
-                  {t.label}
-                </button>
+            <div style={s.tabs}>
+              {t.tabs.map((name,i) => (
+                <button key={i} onClick={() => setTab(i)} style={s.tab(tab===i)}>{name}</button>
               ))}
             </div>
 
-            {/* News tab */}
-            {tab === "news" && (
+            {tab === 0 && (
               <>
-                {news.map((item,i) => <NewsCard key={i} item={item} />)}
-                <button onClick={generateRecap} disabled={recapLoading} style={{ background:"#1e293b", color:"#a78bfa", border:"1px solid #7c3aed", borderRadius:10, padding:"10px 20px", fontSize:13, fontWeight:600, cursor:"pointer", width:"100%", marginTop:4, marginBottom:8 }}>
-                  {recapLoading ? "⏳ Generating..." : "📋 Daily Recap BustedData (FR + EN)"}
+                {news.map((item,i) => <NewsCard key={i} item={item} lang={lang} />)}
+                <button onClick={genRecap} disabled={recapLoading} style={s.recapBtn}>
+                  {recapLoading ? t.generating : "📋 "+t.recap}
                 </button>
-                {recapLoading && <ProgressBar label="Writing briefing..." pct={recapProg} />}
+                {recapLoading && <Progress label={t.generating} pct={recapProg} />}
                 {recap && (
-                  <div style={{ background:"#1a1a2e", border:"1px solid #7c3aed44", borderRadius:12, padding:18, whiteSpace:"pre-wrap", fontSize:14, color:"#cbd5e1", lineHeight:1.8 }}>
-                    <div style={{ color:"#a78bfa", fontWeight:700, marginBottom:10, fontSize:13 }}>📋 DAILY BRIEFING — BUSTEDDATA</div>
-                    {recap}
+                  <div style={s.sectionCard}>
+                    <div style={s.outHdr}><span style={s.sectionTitle}>📋 BustedData — Daily Briefing</span><button style={s.copyBtn} onClick={()=>navigator.clipboard.writeText(recap)}>{t.copy}</button></div>
+                    <div style={{fontSize:13,color:"var(--color-text-secondary,#6b7280)",lineHeight:1.8,whiteSpace:"pre-wrap"}}>{recap}</div>
                   </div>
                 )}
               </>
             )}
-
-            {/* Trends tab */}
-            {tab === "trends" && <TrendAnalysis news={news} />}
-
-            {/* Hashtags tab */}
-            {tab === "hashtags" && <HashtagTracker news={news} />}
-
-            {/* Calendar tab */}
-            {tab === "calendar" && <EditorialCalendar news={news} />}
+            {tab === 1 && <TrendsTab news={news} lang={lang} />}
+            {tab === 2 && <HashtagTab news={news} lang={lang} />}
+            {tab === 3 && <CalendarTab news={news} lang={lang} />}
+            {tab === 4 && <ProjectsTab lang={lang} />}
           </>
+        )}
+
+        {!news.length && tab !== 4 && (
+          <div style={{textAlign:"center",padding:"40px 20px"}}>
+            <div style={{fontSize:32,marginBottom:12}}>🛡️</div>
+            <div style={{fontSize:13,color:"var(--color-text-secondary,#6b7280)",marginBottom:16}}>{lang==="fr"?"Cliquez pour charger les dernières news sécurité.":"Click to load the latest security news."}</div>
+          </div>
         )}
       </div>
     </div>
   );
-        }
+}
