@@ -1,16 +1,20 @@
 import{useState,useEffect}from"react";
 
-const HISTORY_KEY="scrapinfo_hist_v1";
-const loadHist=()=>{try{const r=localStorage.getItem(HISTORY_KEY);return r?JSON.parse(r):[];}catch{return[];}};
-const saveHist=(e)=>{try{localStorage.setItem(HISTORY_KEY,JSON.stringify(e));}catch{}};
+// ── PERSISTENCE ───────────────────────────────────────────────
+const HIST_KEY="scrapinfo_hist_v1";
+const PROJ_KEY="scrapinfo_projects_v1";
+const loadHist=()=>{try{const r=localStorage.getItem(HIST_KEY);return r?JSON.parse(r):[];}catch{return[];}};
+const saveHist=(e)=>{try{localStorage.setItem(HIST_KEY,JSON.stringify(e));}catch{}};
 const addHist=(entry)=>{const h=loadHist();h.unshift(entry);const t=h.slice(0,500);saveHist(t);return t;};
+const loadProjects=()=>{try{const r=localStorage.getItem(PROJ_KEY);return r?JSON.parse(r):[];}catch{return[];}};
+const saveProjects=(p)=>{try{localStorage.setItem(PROJ_KEY,JSON.stringify(p));}catch{}};
 
 const T={
   fr:{appName:"Scrap Info",appTag:"Veille & Contenu",newProject:"Nouveau projet",projectName:"Nom du projet",projectDescPlaceholder:"Ex: Actualités crypto grand public, ton accessible...",projectTopicsPlaceholder:"Ex: fuites de données, cybersécurité, IA...",projectSave:"Créer",cancel:"Annuler",fetch:"Récupérer les news",fetching:"Chargement...",lastFetch:"Dernière mise à jour",tabs:["News","Tendances","Hashtags","Calendrier","📋 Historique"],recap:"Récap (FR + EN)",generating:"Génération...",analyse:"Analyser les tendances",hashtags:"Générer hashtags",calendar:"Générer le calendrier",export:"Export",copy:"Copier",viral:["Faible","Moyen","Viral"],cached:"News en cache.",btns:["🎙️ ElevenLabs","🖼️ Image","📱 Post Copy","✍️ Blog","🧵 Thread X","🔁 Variations"],mediaBtn:"🎬 Par média",agentBtn:"🤖 Agent IA",mediaLabels:{instagram:"Instagram",youtube:"YouTube Shorts",linkedin:"LinkedIn",tiktok:"TikTok"},confirmDelete:"Supprimer ce projet ?",agentTitle:"🤖 Protocole Agent IA",historyTitle:"📋 Historique",historyEmpty:"Aucune génération enregistrée.",historySearch:"Rechercher...",historyFilterAll:"Tout",historyDelete:"Suppr.",historyClearAll:"Tout effacer",historyExport:"↓ Export",},
   en:{appName:"Scrap Info",appTag:"Intel & Content",newProject:"New project",projectName:"Project name",projectDescPlaceholder:"E.g. Crypto news, casual tone...",projectTopicsPlaceholder:"E.g. data breaches, cybersecurity...",projectSave:"Create",cancel:"Cancel",fetch:"Fetch latest news",fetching:"Loading...",lastFetch:"Last fetch",tabs:["News","Trends","Hashtags","Calendar","📋 History"],recap:"Daily Recap (FR + EN)",generating:"Generating...",analyse:"Analyse trends",hashtags:"Generate hashtags",calendar:"Generate calendar",export:"Export",copy:"Copy",viral:["Low","Medium","Viral"],cached:"Using cached news.",btns:["🎙️ ElevenLabs","🖼️ Image","📱 Post Copy","✍️ Blog","🧵 X Thread","🔁 Variations"],mediaBtn:"🎬 Per media",agentBtn:"🤖 AI Agent",mediaLabels:{instagram:"Instagram",youtube:"YouTube Shorts",linkedin:"LinkedIn",tiktok:"TikTok"},confirmDelete:"Delete this project?",agentTitle:"🤖 AI Agent Protocol",historyTitle:"📋 History",historyEmpty:"No generations yet.",historySearch:"Search...",historyFilterAll:"All",historyDelete:"Delete",historyClearAll:"Clear all",historyExport:"↓ Export",},
 };
 const TYPE_ICONS={script:"🎙️",image:"🖼️",post:"📱",blog:"✍️",thread:"🧵",formats:"🔁",media_instagram:"📸",media_youtube:"▶️",media_linkedin:"💼",media_tiktok:"🎵",agent:"🤖",recap:"📋",trends:"📈",hashtags:"🏷️",calendar:"🗓️"};
-const AGENT_PROMPT=(item,proj)=>"You are an AI publishing agent for project \""+proj.name+"\".\nTone: "+(proj.desc||"accessible, punchy bilingual FR+EN")+"\nNEWS: "+item.title+" — "+item.summary+"\nCategory: "+item.category+" | Viral: "+item.viral+"/10\n\nSTEP 1 — GENERATE ALL:\n[INSTAGRAM] Visual concept + Caption FR+EN (hook+body+CTA+10 hashtags) + Story FR+EN 3 slides\n[TIKTOK] Hook FR+EN 3s + Script FR+EN 60s ([0-3s]HOOK/[3-10s]CONTEXT/[10-35s]FACTS/[35-50s]TWIST/[50-60s]CTA) + Montage notes + Caption FR+EN 150chars\n[YOUTUBE] Thumbnail + Title FR+EN 60chars SEO + Script FR+EN 60s + Montage notes + Description FR+EN+tags\n[LINKEDIN] Post FR+EN (hook+paragraphs+bullets+CTA+hashtags) + Article idea\n[X/TWITTER] Thread FR+EN 7 tweets max 280chars + Single post FR+EN\n\nSTEP 2 — VALIDATION CHECKLIST (all must be approved):\n□ Caption Instagram FR/EN □ Visual □ Script TikTok FR/EN □ Montage □ Script YouTube FR/EN □ Thumbnail □ Post LinkedIn FR/EN □ Thread X FR/EN\n\nSTEP 3 — POST SEQUENCE: 1.X now 2.Instagram +10min 3.TikTok +40min 4.YouTube +70min 5.LinkedIn +130min\n\nSTEP 4 — REPORT: links + engagement prediction + 48h follow-up\nAPIs: Instagram Graph API | TikTok Content Posting API | YouTube Data API v3 | LinkedIn Share API | Twitter API v2\nENV: INSTAGRAM_ACCESS_TOKEN TIKTOK_ACCESS_TOKEN YOUTUBE_OAUTH2_TOKEN LINKEDIN_ACCESS_TOKEN TWITTER_API_KEY";
+const AGENT_PROMPT=(item,proj)=>"You are an AI publishing agent for project \""+proj.name+"\".\nTone: "+(proj.desc||"accessible, punchy bilingual FR+EN")+"\nNEWS: "+item.title+" — "+item.summary+"\nCategory: "+item.category+" | Viral: "+item.viral+"/10\n\nSTEP 1 — GENERATE ALL:\n[INSTAGRAM] Visual concept + Caption FR+EN (hook+body+CTA+10 hashtags) + Story FR+EN 3 slides\n[TIKTOK] Hook FR+EN 3s + Script FR+EN 60s + Montage notes + Caption FR+EN 150chars\n[YOUTUBE] Thumbnail + Title FR+EN 60chars SEO + Script FR+EN 60s + Montage notes + Description FR+EN\n[LINKEDIN] Post FR+EN (hook+paragraphs+bullets+CTA+hashtags) + Article idea\n[X/TWITTER] Thread FR+EN 7 tweets max 280chars + Single post FR+EN\n\nSTEP 2 — VALIDATION (all must be approved):\n□ Caption Instagram FR/EN □ Visual □ Script TikTok FR/EN □ Montage □ Script YouTube FR/EN □ Thumbnail □ Post LinkedIn FR/EN □ Thread X FR/EN\n\nSTEP 3 — POST SEQUENCE: 1.X now 2.Instagram +10min 3.TikTok +40min 4.YouTube +70min 5.LinkedIn +130min\nSTEP 4 — REPORT: links + engagement prediction + 48h follow-up\nAPIs: Instagram Graph API | TikTok Content Posting API | YouTube Data API v3 | LinkedIn Share API | Twitter API v2\nENV: INSTAGRAM_ACCESS_TOKEN TIKTOK_ACCESS_TOKEN YOUTUBE_OAUTH2_TOKEN LINKEDIN_ACCESS_TOKEN TWITTER_API_KEY";
 function mp(media,b,proj){const t="Tone: "+(proj.desc||"accessible")+". Project: "+proj.name+".";if(media==="instagram")return t+"\nNews: "+b+"\nINSTAGRAM FR+EN: VISUAL CONCEPT / CAPTION FR+EN (hook+body+CTA+hashtags) / STORY FR+EN 3 slides. Plain text.";if(media==="youtube")return t+"\nNews: "+b+"\nYOUTUBE SHORTS FR+EN: THUMBNAIL / TITLE FR+EN / SCRIPT FR+EN 60s / MONTAGE NOTES / DESCRIPTION FR+EN. Plain text.";if(media==="linkedin")return t+"\nNews: "+b+"\nLINKEDIN FR+EN: POST FR+EN (hook+paragraphs+bullets+CTA+hashtags) / ARTICLE IDEA. Plain text.";if(media==="tiktok")return t+"\nNews: "+b+"\nTIKTOK FR+EN: HOOK FR+EN 3s / SCRIPT FR+EN 60s / MONTAGE NOTES / CAPTION FR+EN 150chars. Plain text.";return"";}
 async function askClaude(prompt){const r=await fetch("/api/claude",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({messages:[{role:"user",content:prompt}]})});const d=await r.json();if(!r.ok)throw new Error(d.error?.message||"API error");if(!d.text)throw new Error("Empty");return d.text;}
 const MC={instagram:{icon:"📸",bg:"#FBEAF0",border:"#ED93B1",text:"#993556",desc:"Caption+Story"},youtube:{icon:"▶️",bg:"#FCEBEB",border:"#F09595",text:"#A32D2D",desc:"Script+Montage"},linkedin:{icon:"💼",bg:"#E6F1FB",border:"#85B7EB",text:"#185FA5",desc:"Post+Article"},tiktok:{icon:"🎵",bg:"#FAECE7",border:"#F0997B",text:"#993C1D",desc:"Script+Caption"}};
@@ -47,10 +51,7 @@ function HistoryPanel({lang,projName}){
     <div style={S.sc2}>
       <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12,flexWrap:"wrap",gap:8}}>
         <span style={S.st}>{t.historyTitle} ({filtered.length})</span>
-        <div style={{display:"flex",gap:6}}>
-          {filtered.length>0&&<button onClick={exportAll} style={{...S.eb,marginLeft:0}}>{t.historyExport}</button>}
-          {entries.length>0&&<button onClick={clearAll} style={{...S.sec,padding:"4px 10px",fontSize:10,color:"#993C1D",border:"0.5px solid #F0997B",background:"#FAECE7"}}>{t.historyClearAll}</button>}
-        </div>
+        <div style={{display:"flex",gap:6}}>{filtered.length>0&&<button onClick={exportAll} style={{...S.eb,marginLeft:0}}>{t.historyExport}</button>}{entries.length>0&&<button onClick={clearAll} style={{...S.sec,padding:"4px 10px",fontSize:10,color:"#993C1D",border:"0.5px solid #F0997B",background:"#FAECE7"}}>{t.historyClearAll}</button>}</div>
       </div>
       <div style={{display:"flex",gap:8,marginBottom:12,flexWrap:"wrap"}}>
         <input style={{...S.inp,marginBottom:0,flex:2,minWidth:140}} placeholder={t.historySearch} value={search} onChange={e=>setSearch(e.target.value)}/>
@@ -76,8 +77,8 @@ function HistoryPanel({lang,projName}){
                   <span style={{fontSize:10,padding:"2px 7px",borderRadius:99,background:css.vs,color:css.t2,border:"0.5px solid "+css.b1}}>{entry.project}</span>
                   <span style={{fontSize:10,color:css.t2}}>{new Date(entry.ts).toLocaleString(lang==="fr"?"fr-FR":"en-GB")}</span>
                 </div>
-                <div style={{fontSize:12,fontWeight:600,color:css.t1,marginBottom:2,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{entry.title}</div>
-                {expanded!==entry.id&&<div style={{fontSize:11,color:css.t2}}>{(entry.content||"").slice(0,80)}...</div>}
+                <div style={{fontSize:12,fontWeight:600,color:css.t1,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{entry.title}</div>
+                {expanded!==entry.id&&<div style={{fontSize:11,color:css.t2,marginTop:2}}>{(entry.content||"").slice(0,80)}...</div>}
               </div>
               <div style={{display:"flex",gap:4,flexShrink:0}}>
                 <button onClick={()=>setExpanded(expanded===entry.id?null:entry.id)} style={{...S.cpb,padding:"3px 8px"}}>{expanded===entry.id?"▲":"▼"}</button>
@@ -106,17 +107,14 @@ function AgentPanel({item,lang,proj,onClose}){
   const exp=()=>{if(!protocol)return;const all=protocol+"\n\n=== VALIDATION ===\n"+VI.map((v,i)=>(checks[i]?"[✓]":"[ ]")+" "+v).join("\n");Object.assign(document.createElement("a"),{href:URL.createObjectURL(new Blob([all],{type:"text/plain"})),download:proj.name.replace(/\s+/g,"_")+"_agent.txt"}).click();};
   return(
     <div style={S.apa}>
-      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:10}}>
-        <span style={{fontSize:12,fontWeight:700,color:"#534AB7"}}>{t.agentTitle}</span>
-        <div style={{display:"flex",gap:6}}>{protocol&&<button onClick={exp} style={{...S.eb,marginLeft:0,background:"#7F77DD",color:"#fff",border:"none",fontSize:10}}>↓ Export</button>}<button onClick={onClose} style={{...S.sec,padding:"4px 10px",fontSize:10}}>{t.cancel}</button></div>
-      </div>
+      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:10}}><span style={{fontSize:12,fontWeight:700,color:"#534AB7"}}>{t.agentTitle}</span><div style={{display:"flex",gap:6}}>{protocol&&<button onClick={exp} style={{...S.eb,marginLeft:0,background:"#7F77DD",color:"#fff",border:"none",fontSize:10}}>↓ Export</button>}<button onClick={onClose} style={{...S.sec,padding:"4px 10px",fontSize:10}}>{t.cancel}</button></div></div>
       <div style={{display:"flex",gap:5,marginBottom:10,flexWrap:"wrap"}}>{STEPS.map((s,i)=><button key={i} onClick={()=>protocol&&setStep(i)} style={{fontSize:11,padding:"4px 10px",borderRadius:99,border:"0.5px solid "+(step===i?"#7F77DD":css.b2),background:step===i?"#7F77DD":css.v,color:step===i?"#fff":css.t2,fontWeight:step===i?600:400}}>{s}</button>)}</div>
       {!protocol&&<button onClick={gen} disabled={loading} style={{...S.prm,width:"100%",padding:"10px",fontSize:12}}>{loading?"⏳ "+(lang==="fr"?"Génération...":"Generating..."):"🤖 "+(lang==="fr"?"Générer le protocole":"Generate protocol")}</button>}
       {loading&&<Prog label={lang==="fr"?"Génération...":"Generating..."} pct={prog}/>}
       {protocol&&step===0&&<div style={S.ob}><div style={S.oh}><span style={S.ol}>📋</span><div style={{display:"flex",gap:5}}><button style={S.cpb} onClick={()=>navigator.clipboard.writeText(protocol)}>{t.copy}</button><button onClick={()=>setProtocol(null)} style={{...S.cpb,color:"#993C1D"}}>↺</button></div></div><div style={S.ot}>{protocol}</div></div>}
       {protocol&&step===1&&(
         <div style={{background:css.v,border:"0.5px solid #AFA9EC",borderRadius:8,padding:"10px 12px",marginTop:8}}>
-          <div style={{display:"flex",justifyContent:"space-between",marginBottom:8}}><span style={{fontSize:12,fontWeight:600,color:css.t1}}>{lang==="fr"?"Validation":"Validation"} — {VI.filter((_,i)=>checks[i]).length}/{VI.length}</span><span style={{fontSize:10,padding:"2px 8px",borderRadius:99,background:allOk?"#EAF3DE":"#FAEEDA",color:allOk?"#3B6D11":"#854F0B"}}>{allOk?"✓ OK":"Pending"}</span></div>
+          <div style={{display:"flex",justifyContent:"space-between",marginBottom:8}}><span style={{fontSize:12,fontWeight:600,color:css.t1}}>Validation — {VI.filter((_,i)=>checks[i]).length}/{VI.length}</span><span style={{fontSize:10,padding:"2px 8px",borderRadius:99,background:allOk?"#EAF3DE":"#FAEEDA",color:allOk?"#3B6D11":"#854F0B"}}>{allOk?"✓ OK":"Pending"}</span></div>
           {VI.map((v,i)=><div key={i} style={{display:"flex",alignItems:"center",gap:8,padding:"4px 0",borderBottom:"0.5px solid "+css.b1,cursor:"pointer"}} onClick={()=>setChecks(c=>({...c,[i]:!c[i]}))}>
             <div style={{width:14,height:14,borderRadius:3,border:"1.5px solid "+(checks[i]?"#7F77DD":css.b2),background:checks[i]?"#7F77DD":"transparent",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>{checks[i]&&<span style={{fontSize:9,color:"#fff",fontWeight:700}}>✓</span>}</div>
             <span style={{fontSize:12,color:css.t1}}>{v}</span>
@@ -126,7 +124,7 @@ function AgentPanel({item,lang,proj,onClose}){
       )}
       {protocol&&step===2&&(
         <div>
-          {!allOk&&<div style={{...S.inf,background:"#FAECE7",border:"0.5px solid #F0997B",color:"#993C1D"}}>⚠️ {lang==="fr"?"Validation incomplète":"Incomplete validation"}</div>}
+          {!allOk&&<div style={{...S.inf,background:"#FAECE7",border:"0.5px solid #F0997B",color:"#993C1D"}}>⚠️ Validation incomplète</div>}
           <div style={{fontSize:12,fontWeight:600,color:css.t1,marginBottom:8}}>{lang==="fr"?"Ordre de publication:":"Publishing order:"}</div>
           <div style={{display:"grid",gridTemplateColumns:"repeat(5,1fr)",gap:6,marginBottom:10}}>
             {[{n:"X/Twitter",bg:"#E1F5EE",br:"#5DCAA5",tx:"#0F6E56",ic:"✕",d:"Now"},{n:"Instagram",bg:"#FBEAF0",br:"#ED93B1",tx:"#993556",ic:"📸",d:"+10min"},{n:"TikTok",bg:"#FAECE7",br:"#F0997B",tx:"#993C1D",ic:"🎵",d:"+40min"},{n:"YouTube",bg:"#FCEBEB",br:"#F09595",tx:"#A32D2D",ic:"▶️",d:"+70min"},{n:"LinkedIn",bg:"#E6F1FB",br:"#85B7EB",tx:"#185FA5",ic:"💼",d:"+130min"}].map((net,i)=>(
@@ -178,10 +176,7 @@ function NewsCard({item,lang,proj}){
   const tog=(p)=>{if(p==="media"){setShowMedia(!showMedia);setShowAgent(false);setOpen(null);}if(p==="agent"){setShowAgent(!showAgent);setShowMedia(false);setOpen(null);}};
   return(
     <div style={S.card}>
-      <div style={{display:"flex",gap:10,alignItems:"flex-start",marginBottom:10}}>
-        <span style={S.cb(item.category)}>{item.category}</span>
-        <div style={{flex:1}}><div style={S.t1}>{item.title}</div><div style={S.sm}>{item.summary}</div><div style={S.mt}><span style={S.sc}>{item.source}</span>{item.trend&&<span style={S.tr2}>{item.trend}</span>}<span style={S.vb(item.viral)}>{item.viral}/10 — {vl}</span></div></div>
-      </div>
+      <div style={{display:"flex",gap:10,alignItems:"flex-start",marginBottom:10}}><span style={S.cb(item.category)}>{item.category}</span><div style={{flex:1}}><div style={S.t1}>{item.title}</div><div style={S.sm}>{item.summary}</div><div style={S.mt}><span style={S.sc}>{item.source}</span>{item.trend&&<span style={S.tr2}>{item.trend}</span>}<span style={S.vb(item.viral)}>{item.viral}/10 — {vl}</span></div></div></div>
       <div style={S.dv}/>
       <div style={S.ar}>
         {BK.map((k,i)=><button key={k} onClick={()=>gen(k)} disabled={!!loading} style={S.ab(open===k)}>{loading===k?"⏳":t.btns[i]}</button>)}
@@ -216,8 +211,6 @@ function ProjectWorkspace({proj,lang}){
   const genRecap=async()=>{setRecapLoading(true);setRecapProg(10);const tick=setInterval(()=>setRecapProg(p=>Math.min(p+9,85)),400);const list=news.map((n,i)=>(i+1)+". ["+n.category+"] "+n.title+": "+n.summary).join("\n");try{const text=await askClaude("Project \""+proj.name+"\" briefing. Tone: "+(proj.desc||"accessible")+"\n"+list+"\n\nRECAP FR 5-6 sentences.\nDAILY BRIEFING EN same. Plain text.");clearInterval(tick);setRecapProg(100);setRecap(text);addHist({id:Date.now().toString(36),ts:Date.now(),project:proj.name,type:"recap",title:"Recap "+new Date().toLocaleDateString(),content:text});}catch(e){clearInterval(tick);setRecapProg(0);setRecap("Error: "+e.message);}setRecapLoading(false);};
   const avg=news.length?Math.round(news.reduce((a,n)=>a+(n.viral||5),0)/news.length*10)/10:0;
   const topN=news.length?news.reduce((a,b)=>((b.viral||0)>(a.viral||0)?b:a)):{};
-  // KEY FIX: always show tabs, History tab always accessible
-  const showTabs=news.length>0||tab===4;
   return(
     <div style={S.main}>
       <div style={{background:css.vs,borderRadius:8,padding:"10px 14px",marginBottom:14,display:"flex",justifyContent:"space-between",alignItems:"center",flexWrap:"wrap",gap:8}}>
@@ -227,15 +220,9 @@ function ProjectWorkspace({proj,lang}){
       <button onClick={fetchNews} disabled={loading} style={S.fb(loading)}>{loading?t.fetching:"↻  "+t.fetch}</button>
       {loading&&<Prog label={t.fetching} pct={prog}/>}
       {fetchErr&&<div style={S.inf}>{fetchErr}</div>}
-      {/* ALWAYS show tabs bar — History tab visible even before fetch */}
       <div style={S.ts}>{t.tabs.map((name,i)=><button key={i} onClick={()=>setTab(i)} style={S.tb(tab===i)}>{name}</button>)}</div>
       {tab===0&&news.length===0&&<div style={{textAlign:"center",padding:"32px 20px"}}><div style={{fontSize:32,marginBottom:12}}>📡</div><div style={{fontSize:13,color:css.t2}}>{lang==="fr"?'Cliquez pour scraper les news sur "'+(proj.topics||proj.name)+'".' :'Click to fetch news on "'+(proj.topics||proj.name)+'".'}</div></div>}
-      {tab===0&&news.length>0&&(<>
-        {news.map((item,i)=><NewsCard key={i} item={item} lang={lang} proj={proj}/>)}
-        <button onClick={genRecap} disabled={recapLoading} style={S.rb}>{recapLoading?t.generating:"📋 "+t.recap}</button>
-        {recapLoading&&<Prog label={t.generating} pct={recapProg}/>}
-        {recap&&<div style={S.sc2}><div style={S.oh}><span style={S.st}>📋 {proj.name}</span><button style={S.cpb} onClick={()=>navigator.clipboard.writeText(recap)}>{t.copy}</button></div><div style={{fontSize:13,color:css.t2,lineHeight:1.8,whiteSpace:"pre-wrap"}}>{recap}</div></div>}
-      </>)}
+      {tab===0&&news.length>0&&(<>{news.map((item,i)=><NewsCard key={i} item={item} lang={lang} proj={proj}/>)}<button onClick={genRecap} disabled={recapLoading} style={S.rb}>{recapLoading?t.generating:"📋 "+t.recap}</button>{recapLoading&&<Prog label={t.generating} pct={recapProg}/>}{recap&&<div style={S.sc2}><div style={S.oh}><span style={S.st}>📋 {proj.name}</span><button style={S.cpb} onClick={()=>navigator.clipboard.writeText(recap)}>{t.copy}</button></div><div style={{fontSize:13,color:css.t2,lineHeight:1.8,whiteSpace:"pre-wrap"}}>{recap}</div></div>}</>)}
       {tab===1&&<div style={S.sc2}><div style={S.sr}><div style={S.sk}><div style={S.sl}>Stories</div><div style={S.sv}>{news.length}</div></div><div style={S.sk}><div style={S.sl}>{lang==="fr"?"Score moyen":"Avg"}</div><div style={S.sv}>{avg}</div></div><div style={S.sk}><div style={S.sl}>Top</div><div style={{...S.sv,fontSize:11,paddingTop:4}}>{topN.category||"—"}</div></div></div><button onClick={()=>trends.run("Trends \""+proj.name+"\": "+news.map((n,i)=>(i+1)+". "+n.title).join(", ")+"\nTREND FR 5-6s\nTREND EN same\nOPP 3 angles\nTIME by platform\nPlain text.",{project:proj.name,type:"trends",title:"Trends "+new Date().toLocaleDateString()})} disabled={trends.loading} style={S.sb()}>{trends.loading?"⏳ "+t.generating:"📈 "+t.analyse}</button>{trends.loading&&<Prog label={t.generating} pct={trends.prog}/>}{trends.result&&<div style={S.ob}><div style={S.oh}><span style={S.ol}>📈</span><button style={S.cpb} onClick={()=>navigator.clipboard.writeText(trends.result)}>{t.copy}</button></div><div style={S.ot}>{trends.result}</div></div>}</div>}
       {tab===2&&<div style={S.sc2}><div style={S.st}>🏷️ Hashtags</div><button onClick={()=>hash.run("Hashtags \""+proj.name+"\": "+news.map(n=>n.title).join(", ")+"\nFR 10 ranked\nEN 10 ranked\nTRENDING 5\nAVOID 3\nPlain text.",{project:proj.name,type:"hashtags",title:"Hashtags "+new Date().toLocaleDateString()})} disabled={hash.loading} style={S.sb()}>{hash.loading?"⏳ "+t.generating:t.hashtags}</button>{hash.loading&&<Prog label={t.generating} pct={hash.prog}/>}{hash.result&&<div style={S.ob}><div style={S.oh}><span style={S.ol}>🏷️</span><button style={S.cpb} onClick={()=>navigator.clipboard.writeText(hash.result)}>{t.copy}</button></div><div style={S.ot}>{hash.result}</div></div>}</div>}
       {tab===3&&<div style={S.sc2}><div style={S.st}>🗓️ {t.tabs[3]}</div><div style={{display:"flex",gap:8}}><button onClick={()=>cal.run("7-day calendar \""+proj.name+"\": "+news.map((n,i)=>(i+1)+". ["+n.viral+"/10] "+n.title).join("\n")+"\nDAY/PLATFORM/CONTENT/TIME/HOOK. Prioritize viral. Plain text.",{project:proj.name,type:"calendar",title:"Calendar "+new Date().toLocaleDateString()})} disabled={cal.loading} style={{...S.sb(),flex:1}}>{cal.loading?"⏳ "+t.generating:"🗓️ "+t.calendar}</button>{cal.result&&<button onClick={()=>Object.assign(document.createElement("a"),{href:URL.createObjectURL(new Blob([cal.result],{type:"text/plain"})),download:proj.name+"_cal.txt"}).click()} style={{...S.sec,padding:"9px 14px"}}>↓</button>}</div>{cal.loading&&<Prog label={t.generating} pct={cal.prog}/>}{cal.result&&<div style={S.ob}><div style={S.oh}><span style={S.ol}>🗓️</span><button style={S.cpb} onClick={()=>navigator.clipboard.writeText(cal.result)}>{t.copy}</button></div><div style={S.ot}>{cal.result}</div></div>}</div>}
@@ -248,13 +235,29 @@ function NewProjectForm({lang,onSave,onCancel}){const t=T[lang];const [form,setF
 
 export default function App(){
   const [lang,setLang]=useState("fr");
-  const [projects,setProjects]=useState([]);
-  const [activeId,setActiveId]=useState(null);
+  // ── PROJECTS PERSISTENT IN LOCALSTORAGE ──────────────────────
+  const [projects,setProjects]=useState(()=>loadProjects());
+  const [activeId,setActiveId]=useState(()=>{const p=loadProjects();return p.length?p[0].id:null;});
   const [showNew,setShowNew]=useState(false);
   const t=T[lang];
-  const addProject=(proj)=>{setProjects(p=>[...p,proj]);setActiveId(proj.id);setShowNew(false);};
-  const deleteProject=(id)=>{if(!window.confirm(t.confirmDelete))return;const rest=projects.filter(p=>p.id!==id);setProjects(rest);setActiveId(rest.length?rest[rest.length-1].id:null);};
+
+  // Save projects to localStorage on every change
+  useEffect(()=>{saveProjects(projects);},[projects]);
+
+  const addProject=(proj)=>{
+    const updated=[...projects,proj];
+    setProjects(updated);
+    setActiveId(proj.id);
+    setShowNew(false);
+  };
+  const deleteProject=(id)=>{
+    if(!window.confirm(t.confirmDelete))return;
+    const rest=projects.filter(p=>p.id!==id);
+    setProjects(rest);
+    setActiveId(rest.length?rest[rest.length-1].id:null);
+  };
   const activeProj=projects.find(p=>p.id===activeId);
+
   return(
     <div style={S.shell}>
       <div style={S.topbar}><div style={S.lRow}><div style={S.lBox}>SI</div><span style={S.lName}>{t.appName}</span><span style={S.lBadge}>{t.appTag}</span></div><div style={S.tr}><button onClick={()=>setLang("fr")} style={S.lb(lang==="fr")}>FR</button><button onClick={()=>setLang("en")} style={S.lb(lang==="en")}>EN</button></div></div>
@@ -264,4 +267,4 @@ export default function App(){
       {!showNew&&!activeProj&&<div style={{textAlign:"center",padding:"60px 20px"}}><div style={{fontSize:40,marginBottom:12}}>📡</div><div style={{fontSize:15,fontWeight:600,color:css.t1,marginBottom:8}}>{t.appName}</div><div style={{fontSize:13,color:css.t2,marginBottom:24,maxWidth:380,margin:"0 auto 24px"}}>{lang==="fr"?"Créez un projet pour scraper et générer du contenu.":"Create a project to scrape and generate content."}</div><button onClick={()=>setShowNew(true)} style={S.prm}>+ {t.newProject}</button></div>}
     </div>
   );
-                       }
+            }
